@@ -262,6 +262,91 @@ button[type='submit']:hover {
   color: var(--text);
 }
 
+.icon-array-section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.icon-array-section h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--accent-dark);
+}
+
+.icon-array-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icon-array-controls label {
+  font-size: 0.95rem;
+}
+
+.icon-array-controls select {
+  width: auto;
+  min-width: 200px;
+}
+
+.icon-array {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 6px;
+  max-width: 340px;
+}
+
+.icon-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.icon-dot--safe {
+  background-color: #2ecc71;
+}
+
+.icon-dot--avoided {
+  background-color: #0c8fd6;
+}
+
+.icon-dot--event {
+  background-color: #ef476f;
+}
+
+.icon-array-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.legend-dot--safe {
+  background-color: #2ecc71;
+}
+
+.legend-dot--avoided {
+  background-color: #0c8fd6;
+}
+
+.legend-dot--event {
+  background-color: #ef476f;
+}
+
 .chart-container {
   position: relative;
   min-height: 360px;

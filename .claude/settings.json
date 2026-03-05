@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pkill -f 'python3 -m http.server' 2>/dev/null; cd /home/user/cvdriskcalculator && python3 -m http.server 8080 &"
+          }
+        ]
+      }
+    ]
+  }
+}
