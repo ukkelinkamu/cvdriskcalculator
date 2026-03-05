@@ -169,20 +169,41 @@ function renderIconArray(container, baselineRisk, treatedRisk) {
   if (!container) return;
   container.innerHTML = '';
 
-  const eventCount = Math.round(treatedRisk * 100);
-  const avoidedCount = Math.max(0, Math.round(baselineRisk * 100) - eventCount);
-  const safeCount = 100 - eventCount - avoidedCount;
+  const safeEnd    = (1 - baselineRisk) * 100;
+  const avoidedEnd = safeEnd + (baselineRisk - treatedRisk) * 100;
+
+  const COLOR_SAFE    = '#2ecc71';
+  const COLOR_AVOIDED = '#0c8fd6';
+  const COLOR_EVENT   = '#ef476f';
 
   for (let i = 0; i < 100; i++) {
     const dot = document.createElement('div');
     dot.className = 'icon-dot';
-    if (i < safeCount) {
+
+    const crossesSafe    = i < safeEnd    && i + 1 > safeEnd;
+    const crossesAvoided = i < avoidedEnd && i + 1 > avoidedEnd;
+
+    if (crossesSafe && crossesAvoided) {
+      const s = (safeEnd - i) * 100;
+      const a = (avoidedEnd - i) * 100;
+      dot.style.background =
+        `linear-gradient(to right, ${COLOR_SAFE} ${s}%, ${COLOR_AVOIDED} ${s}%, ${COLOR_AVOIDED} ${a}%, ${COLOR_EVENT} ${a}%)`;
+    } else if (crossesSafe) {
+      const frac = (safeEnd - i) * 100;
+      dot.style.background =
+        `linear-gradient(to right, ${COLOR_SAFE} ${frac}%, ${COLOR_AVOIDED} ${frac}%)`;
+    } else if (crossesAvoided) {
+      const frac = (avoidedEnd - i) * 100;
+      dot.style.background =
+        `linear-gradient(to right, ${COLOR_AVOIDED} ${frac}%, ${COLOR_EVENT} ${frac}%)`;
+    } else if (i + 1 <= safeEnd) {
       dot.classList.add('icon-dot--safe');
-    } else if (i < safeCount + avoidedCount) {
+    } else if (i + 1 <= avoidedEnd) {
       dot.classList.add('icon-dot--avoided');
     } else {
       dot.classList.add('icon-dot--event');
     }
+
     container.appendChild(dot);
   }
 }
