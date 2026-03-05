@@ -52,9 +52,13 @@ const chartColours = {
 let chartInstance;
 let chartUnavailableNotice;
 let latestTreatmentResults = [];
+let latestBaselineRisk = 0;
 let treatmentCheckboxContainer;
 let treatmentSummaryNote;
 let treatmentSummaryBaseline;
+let iconArrayContainer;
+let iconArraySection;
+let iconArrayTreatmentSelect;
 
 function isChartLibraryAvailable() {
   return typeof window !== 'undefined' && typeof window.Chart === 'function';
@@ -152,13 +156,57 @@ function updateTreatmentList(treatments, container, noteElement) {
     label.textContent = strategy.label;
 
     const value = document.createElement('span');
-    const absoluteReduction = (strategy.absoluteBenefit * 100).toFixed(1);
-    value.innerHTML = `<strong>${formatPercent(strategy.risk)}</strong> (${absoluteReduction}% absolute risk reduction)`;
+    const per1000 = Math.round(strategy.absoluteBenefit * 1000);
+    value.innerHTML = `<strong>${formatPercent(strategy.risk)}</strong> (${per1000} per 1,000 avoid an event over 10 years)`;
 
     listItem.appendChild(label);
     listItem.appendChild(value);
     container.appendChild(listItem);
   });
+}
+
+function renderIconArray(container, baselineRisk, treatedRisk) {
+  if (!container) return;
+  container.innerHTML = '';
+
+  const eventCount = Math.round(treatedRisk * 100);
+  const avoidedCount = Math.max(0, Math.round(baselineRisk * 100) - eventCount);
+  const safeCount = 100 - eventCount - avoidedCount;
+
+  for (let i = 0; i < 100; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'icon-dot';
+    if (i < safeCount) {
+      dot.classList.add('icon-dot--safe');
+    } else if (i < safeCount + avoidedCount) {
+      dot.classList.add('icon-dot--avoided');
+    } else {
+      dot.classList.add('icon-dot--event');
+    }
+    container.appendChild(dot);
+  }
+}
+
+function populateIconArraySelect(selectEl, treatments) {
+  if (!selectEl) return;
+  selectEl.innerHTML = '';
+  const nonBaseline = treatments.filter((t) => t.id !== 'baseline');
+  nonBaseline.forEach((t) => {
+    const option = document.createElement('option');
+    option.value = t.id;
+    option.textContent = t.label;
+    selectEl.appendChild(option);
+  });
+}
+
+function updateIconArray() {
+  if (!iconArrayContainer || !iconArrayTreatmentSelect || !latestTreatmentResults.length) return;
+  const selectedId = iconArrayTreatmentSelect.value;
+  const treatment = latestTreatmentResults.find((t) => t.id === selectedId);
+  if (!treatment) return;
+
+  iconArraySection.removeAttribute('hidden');
+  renderIconArray(iconArrayContainer, latestBaselineRisk, treatment.risk);
 }
 
 const barValueLabelPlugin = {
@@ -261,7 +309,7 @@ function renderChart(canvas, treatments) {
       scales: {
         y: {
           beginAtZero: true,
-          max: 50,
+          max: 40,
           ticks: {
             callback: (value) => `${value}%`,
           },
@@ -333,6 +381,13 @@ function initializeForm() {
   treatmentCheckboxContainer = document.getElementById('treatment-checkboxes');
   treatmentSummaryNote = document.getElementById('treatment-summary-note');
   treatmentSummaryBaseline = document.getElementById('treatment-summary-baseline');
+  iconArrayContainer = document.getElementById('icon-array');
+  iconArraySection = document.getElementById('icon-array-section');
+  iconArrayTreatmentSelect = document.getElementById('icon-array-treatment');
+
+  if (iconArrayTreatmentSelect) {
+    iconArrayTreatmentSelect.addEventListener('change', updateIconArray);
+  }
 
   const yearElement = document.getElementById('year');
   if (yearElement) {
@@ -377,9 +432,12 @@ function initializeForm() {
 
       const treatments = calculateTreatmentRisks(baselineRisk);
       latestTreatmentResults = treatments;
+      latestBaselineRisk = baselineRisk;
       updateTreatmentSummaryBaseline(baselineRisk);
       updateTreatmentList(treatments, treatmentList, treatmentSummaryNote);
       applySelectedTreatmentsToChart();
+      populateIconArraySelect(iconArrayTreatmentSelect, treatments);
+      updateIconArray();
     } catch (error) {
       console.error(error);
       baselineOutput.innerHTML =
