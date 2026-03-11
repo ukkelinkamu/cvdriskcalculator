@@ -144,6 +144,52 @@ button[type='submit']:hover {
   font-size: 1.3rem;
 }
 
+.risk-interpretation {
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-top: 0.75rem;
+  border-left: 4px solid var(--muted);
+  background: rgba(81, 96, 112, 0.06);
+  font-size: 0.95rem;
+}
+
+.risk-interpretation p {
+  margin: 0;
+}
+
+.risk-interpretation.risk-low {
+  border-left-color: #2ecc71;
+  background: rgba(46, 204, 113, 0.08);
+}
+
+.risk-interpretation.risk-borderline {
+  border-left-color: #f3a712;
+  background: rgba(243, 167, 18, 0.08);
+}
+
+.risk-interpretation.risk-intermediate {
+  border-left-color: #ef8c1a;
+  background: rgba(239, 140, 26, 0.08);
+}
+
+.risk-interpretation.risk-high {
+  border-left-color: #ef476f;
+  background: rgba(239, 71, 111, 0.08);
+}
+
+.uncertainty-note {
+  background: rgba(81, 96, 112, 0.06);
+  border-left: 3px solid var(--muted);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.uncertainty-note p {
+  margin: 0;
+}
+
 .treatment-list {
   list-style: none;
   padding: 0;
@@ -153,12 +199,38 @@ button[type='submit']:hover {
 }
 
 .treatment-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+  display: grid;
+  gap: 0.35rem;
   background: rgba(12, 143, 214, 0.08);
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
+}
+
+.treatment-label {
+  font-size: 1rem;
+}
+
+.treatment-detail-lines {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.benefit-line {
+  color: var(--accent-dark);
+  font-weight: 500;
+}
+
+.residual-line,
+.safe-line {
+  font-size: 0.85rem;
+}
+
+.nnt-line {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--muted);
 }
 .treatment-summary {
   border: 1px solid rgba(12, 143, 214, 0.12);

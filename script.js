@@ -68,6 +68,37 @@ function formatPercent(probability) {
   return `${(probability * 100).toFixed(1)}%`;
 }
 
+function getRiskCategory(risk) {
+  const pct = risk * 100;
+  if (pct < 5) return { label: 'Low', className: 'risk-low' };
+  if (pct < 10) return { label: 'Borderline', className: 'risk-borderline' };
+  if (pct < 20) return { label: 'Intermediate', className: 'risk-intermediate' };
+  return { label: 'High', className: 'risk-high' };
+}
+
+function updateRiskInterpretation(baselineRisk) {
+  const el = document.getElementById('risk-interpretation');
+  if (!el) return;
+
+  if (!Number.isFinite(baselineRisk) || baselineRisk <= 0) {
+    el.setAttribute('hidden', '');
+    el.innerHTML = '';
+    return;
+  }
+
+  const count = Math.round(baselineRisk * 100);
+  const safeCount = 100 - count;
+  const category = getRiskCategory(baselineRisk);
+
+  el.className = `risk-interpretation ${category.className}`;
+  el.removeAttribute('hidden');
+  el.innerHTML =
+    `<p>Your estimated 10-year risk is <strong>${category.label}</strong>. ` +
+    `Out of 100 people with a similar profile, about <strong>${count}</strong> would have ` +
+    `a coronary heart disease event, heart attack or stroke over the next 10 years, ` +
+    `and about <strong>${safeCount}</strong> would not.</p>`;
+}
+
 function collectFormData(form) {
   const formData = new FormData(form);
   return Object.fromEntries(formData.entries());
@@ -146,21 +177,40 @@ function updateTreatmentList(treatments, container, noteElement) {
 
   if (noteElement) {
     noteElement.textContent =
-      'Estimated 10-year risk and absolute risk reduction compared with no pharmacotherapy.';
+      'Estimated 10-year risk of coronary heart disease, heart attack or stroke, and absolute risk reduction compared with no pharmacotherapy.';
   }
+
+  const baselineCount = Math.round(latestBaselineRisk * 100);
+  const safeCount = 100 - baselineCount;
 
   applicableTreatments.forEach((strategy) => {
     const listItem = document.createElement('li');
 
-    const label = document.createElement('span');
+    const label = document.createElement('strong');
+    label.className = 'treatment-label';
     label.textContent = strategy.label;
 
-    const value = document.createElement('span');
-    const per1000 = Math.round(strategy.absoluteBenefit * 1000);
-    value.innerHTML = `<strong>${formatPercent(strategy.risk)}</strong> (${per1000} per 1,000 avoid an event over 10 years)`;
+    const benefitCount = Math.round(strategy.absoluteBenefit * 100);
+    const eventCount = Math.round(strategy.risk * 100);
+
+    const details = document.createElement('div');
+    details.className = 'treatment-detail-lines';
+
+    const benefitText = benefitCount > 0
+      ? `${benefitCount} fewer out of 100 would have a cardiovascular event over 10 years`
+      : 'Fewer than 1 out of 100 would benefit over 10 years';
+    details.innerHTML =
+      `<span class="benefit-line">${benefitText}</span>` +
+      `<span class="residual-line">${eventCount} out of 100 would still have a cardiovascular event despite treatment</span>` +
+      `<span class="safe-line">${safeCount} out of 100 would not have had a cardiovascular event even without treatment</span>`;
+
+    const nnt = strategy.absoluteBenefit > 0 ? Math.round(1 / strategy.absoluteBenefit) : null;
+    if (nnt !== null && nnt <= 200) {
+      details.innerHTML += `<span class="nnt-line">NNT: ${nnt} people would need treatment for 10 years to prevent one cardiovascular event</span>`;
+    }
 
     listItem.appendChild(label);
-    listItem.appendChild(value);
+    listItem.appendChild(details);
     container.appendChild(listItem);
   });
 }
@@ -450,6 +500,7 @@ function initializeForm() {
       const baselineRisk = selectedModel.calculate(inputs);
       const formattedBaseline = formatPercent(baselineRisk);
       baselineOutput.innerHTML = `Baseline risk (${selectedModel.name}): <strong>${formattedBaseline}</strong>`;
+      updateRiskInterpretation(baselineRisk);
 
       const treatments = calculateTreatmentRisks(baselineRisk);
       latestTreatmentResults = treatments;
@@ -459,10 +510,14 @@ function initializeForm() {
       applySelectedTreatmentsToChart();
       populateIconArraySelect(iconArrayTreatmentSelect, treatments);
       updateIconArray();
+
+      const uncertaintyNote = document.getElementById('uncertainty-note');
+      if (uncertaintyNote) uncertaintyNote.removeAttribute('hidden');
     } catch (error) {
       console.error(error);
       baselineOutput.innerHTML =
         '<strong>Unable to calculate risk with the current inputs. Please review the form.</strong>';
+      updateRiskInterpretation(0);
       updateTreatmentSummaryBaseline();
       updateTreatmentList([], treatmentList, treatmentSummaryNote);
     }

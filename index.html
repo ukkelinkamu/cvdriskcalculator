@@ -126,6 +126,7 @@
       <div class="result-summary">
         <h2>Estimated 10-year cardiovascular risk</h2>
         <p id="baseline-risk">Baseline risk: <strong>--</strong></p>
+        <div id="risk-interpretation" class="risk-interpretation" hidden></div>
       </div>
 
       <div class="chart-controls">
@@ -152,17 +153,21 @@
       </details>
 
       <div class="icon-array-section" id="icon-array-section" hidden>
-        <h3>Risk visualized: 100 people over 10 years</h3>
+        <h3>Risk of coronary heart disease, heart attack or stroke: 100 people over 10 years</h3>
         <div class="icon-array-controls">
           <label for="icon-array-treatment">Compare with:</label>
           <select id="icon-array-treatment"></select>
         </div>
         <div id="icon-array" class="icon-array" role="img" aria-label="Icon array showing risk as 100 person figures"></div>
         <div class="icon-array-legend">
-          <span class="legend-item"><span class="legend-dot legend-dot--event"></span> Event despite treatment</span>
-          <span class="legend-item"><span class="legend-dot legend-dot--avoided"></span> Event avoided by treatment</span>
-          <span class="legend-item"><span class="legend-dot legend-dot--safe"></span> No event</span>
+          <span class="legend-item"><span class="legend-dot legend-dot--event"></span> CVD event despite treatment</span>
+          <span class="legend-item"><span class="legend-dot legend-dot--avoided"></span> CVD event avoided by treatment</span>
+          <span class="legend-item"><span class="legend-dot legend-dot--safe"></span> No CVD event</span>
         </div>
+      </div>
+
+      <div id="uncertainty-note" class="uncertainty-note" hidden>
+        <p><strong>Important context:</strong> These estimates are based on population averages from large studies and may not precisely reflect your individual risk. Treatment benefit estimates assume typical medication effects at standard doses and do not account for medication side effects, adherence, or individual variation in drug response.</p>
       </div>
 
       <div class="chart-container">
